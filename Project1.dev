@@ -1,71 +1,194 @@
-[Project]
-FileName=Project1.dev
-Name=Project1
-Type=1
-Ver=2
-ObjFiles=
-Includes=
-Libs=
-PrivateResource=
-ResourceIncludes=
-MakeIncludes=
-Compiler=
-CppCompiler=
-Linker=
-IsCpp=1
-Icon=
-ExeOutput=
-ObjectOutput=
-LogOutput=
-LogOutputEnabled=0
-OverrideOutput=0
-OverrideOutputName=
-HostApplication=
-UseCustomMakefile=0
-CustomMakefile=
-CommandLine=
-Folders=
-IncludeVersionInfo=0
-SupportXPThemes=0
-CompilerSet=0
-CompilerSettings=0000000000000000000000000
-UnitCount=2
+/*
+  Data in separate file used: 
+  
+  Owner Name	AcctNum	Balance		Date
+	Morgan	34927	757.50		5	18	2011
+	Roper	53628	928.95		11	22	1997	
+	Hammer	28371	2246.25		6	15	2001	  
+	Kizer	41618	6344.75	 	9	29	2009 
+	Lopez	02938	4326.95		2	9	2014	  
+	Kenny	20103	1845.60		10	13	2000
+	Ruiz	30118	3426.45		8	11	1999
+	Romano	11273	2456.68		12	14	2012
+	Hamper	34021	1245.34		4	27	2003
+	Jones	40201	26424.23	6	7	2015 
+  
+	Description: This program creates two classes, the Date and SavAcct classes. The Date class is used to store
+	the date when a customer's saving account is opened. The SavAcct class is used to store the saving account
+	information for each customer. The main function opens up the file containing the saving account information
+	and stores them into arrays which adds a monthly interest of 0.29%. The user is then able to search for an account
+	using the account number.
+*/
 
-[VersionInfo]
-Major=1
-Minor=0
-Release=0
-Build=0
-LanguageID=1033
-CharsetID=1252
-CompanyName=
-FileVersion=
-FileDescription=Developed using the Dev-C++ IDE
-InternalName=
-LegalCopyright=
-LegalTrademarks=
-OriginalFilename=
-ProductName=
-ProductVersion=
-AutoIncBuildNr=0
-SyncProduct=1
+#include<iostream>
+#include<string>
+#include<fstream>
+using namespace std;
+class Date
+{
+	private:
+		int month; 
+		int day; 
+		int year;
+	public:
+		Date()
+		{
+			month=0;
+			day=0; 
+			year=0;
+		}
+		Date(int mo, int dy, int yr)
+		{
+			month=mo;
+			day=dy;
+			year=yr;
+		}
+		int getMonth()
+		{
+			return month;
+		}
+		int getDay()
+		{
+			return day;
+		}
+		int getYear()
+		{
+			return year;
+		}
+		void setDate(int mm, int dd, int yy)
+		{
+			month=mm;
+			day=dd;
+			year=yy;
+		}
+		void getDate()
+		{
+			cout<<"Enter the month, day and year account was open separated by a space "<<endl;
+			cin>>day>>month>>year;
+		}
+		void readDate(ifstream &infile)
+		{
+			infile>>month>>day>>year;
+			setDate(month, day, year);
+		}
+		void display()
+		{
+			cout<<month<<"/"<<day<<"/"<<year<<endl;
+		}
+};
 
-[Unit1]
-FileName=Untitled1.cpp
-CompileCpp=1
-Folder=
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
-[Unit2]
-FileName=record.txt
-Folder=
-Compile=0
-Link=0
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
+class SavAcct
+{
+	private:
+		const static float interest=0.0029;
+		string name;
+		string accnumber;
+		float currbalance;
+		Date openDate;
+	public:
+		SavAcct()
+		{
+			name=" ";
+			accnumber=" ";
+			currbalance=0;
+			openDate.setDate(0,0,0);
+			
+		}
+		SavAcct(string na, string num, float curr, Date d)
+		{
+			name=na;
+			accnumber=num;
+			currbalance=curr;
+			openDate=d;
+		}
+		string getName()
+		{
+			return name;
+		}
+		string getAccNum()
+		{
+			return accnumber;
+		}
+		float getCurrBal()
+		{
+			return currbalance;
+		}
+		Date get_Date()
+		{
+			return openDate;
+		}
+		void set_SavAcct(string nm, string accnum, float currbal, Date dat)
+		{
+			name=nm;
+			accnumber=accnum; 
+			currbalance=currbal;
+			openDate=dat;
+		}
+		void change_balance()
+		{	
+			currbalance=currbalance+(currbalance*interest);
+		}
+		void display_account()
+		{
+			cout<<name<<"\t"<<accnumber<<"\t"<<currbalance<<endl;
+			openDate.display();
+		}
+		void readSavAcct(ifstream &infile)
+		{
+			infile>>name>>accnumber>>currbalance;
+			openDate.readDate(infile);
+		}
+		void getSavAcct()
+		{
+			cout<<"Enter name, account number, and the current balance one at a time";
+			cin>>name>>accnumber>>currbalance;
+			openDate.getDate();
+			
+		}
+		int searchAcct(SavAcct bank[], string a, int size)
+		{
+			int k=0;
+			while(bank[k].getAccNum()!=a&&k<size)
+			{
+				k++;	
+			}
+			if(k==size)
+			return -1;
+			else 
+			return k;
+		}
+};
+main()
+{
+	int i=0,size=0;
+	ifstream infile;
+	string titles, account;
+	SavAcct bank[200];
+	infile.open("record.txt",ios::in);
+	if(!infile)
+	{
+		cout<<"File does not exist"<<endl;
+		return 0;
+	}
+	getline(infile, titles);
+	while(!infile.eof()&&i<200)
+	{
+		bank[i].readSavAcct(infile);
+		i++;
+	}
+	size=i;
+	for(i=0; i<size; i++)
+	{
+		bank[i].change_balance();
+	}
+	
+	cout<<"Enter an account number to search for"<<endl;
+	getline(cin, account);
+	if(bank[i].searchAcct(bank, account, size)==-1)
+	{
+		cout<<"Not found"<<endl;
+	}
+	else
+	bank[bank[i].searchAcct(bank, account, size)].display_account();
+	return 0;
+}
